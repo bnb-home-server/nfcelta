@@ -1,6 +1,7 @@
 import type { Context } from 'hono';
 import type { IReceiptService } from '../types';
 import type { NewReceipt } from '../db/schema';
+import { createReceiptSchema, updateReceiptSchema } from '../validators/receiptValidator';
 
 export class ReceiptController {
   constructor(private receiptService: IReceiptService) {}
@@ -41,8 +42,23 @@ export class ReceiptController {
 
   async createReceipt(c: Context) {
     try {
-      const body = await c.req.json() as NewReceipt;
-      const receipt = await this.receiptService.createReceipt(body);
+      const body = await c.req.json();
+      const validation = createReceiptSchema.safeParse(body);
+
+      if (!validation.success) {
+        return c.json(
+          { 
+            error: 'Validation error', 
+            details: validation.error.issues.map(err => ({
+              field: err.path.join('.'),
+              message: err.message
+            }))
+          },
+          400
+        );
+      }
+
+      const receipt = await this.receiptService.createReceipt(validation.data as NewReceipt);
       return c.json(receipt, 201);
     } catch (error) {
       return c.json(
@@ -57,8 +73,23 @@ export class ReceiptController {
   async updateReceipt(c: Context) {
     try {
       const id = parseInt(c.req.param('id'), 10);
-      const body = await c.req.json() as Partial<NewReceipt>;
-      const receipt = await this.receiptService.updateReceipt(id, body);
+      const body = await c.req.json();
+      const validation = updateReceiptSchema.safeParse(body);
+
+      if (!validation.success) {
+        return c.json(
+          { 
+            error: 'Validation error', 
+            details: validation.error.issues.map(err => ({
+              field: err.path.join('.'),
+              message: err.message
+            }))
+          },
+          400
+        );
+      }
+
+      const receipt = await this.receiptService.updateReceipt(id, validation.data as Partial<NewReceipt>);
 
       if (!receipt) {
         return c.json({ error: 'Receipt not found' }, 404);

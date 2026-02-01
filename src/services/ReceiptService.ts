@@ -1,5 +1,6 @@
 import type { Receipt, NewReceipt } from '../db/schema';
 import type { IReceiptRepository, IReceiptService } from '../types';
+import { ScraperFactory } from '../scrapers/ScraperFactory';
 
 export class ReceiptService implements IReceiptService {
   constructor(private receiptRepository: IReceiptRepository) {}
@@ -16,10 +17,24 @@ export class ReceiptService implements IReceiptService {
   }
 
   async createReceipt(receipt: NewReceipt): Promise<Receipt> {
-    if (!receipt.storeName || !receipt.totalAmount) {
-      throw new Error('Store name and total amount are required');
+    if (!receipt.code || !receipt.UF) {
+      throw new Error('Code and UF are required');
     }
-    return await this.receiptRepository.create(receipt);
+
+    // Get the appropriate scraper for the state
+    const scraper = ScraperFactory.getScraper(receipt.UF);
+    
+    // Fetch data from scraper
+    const scrapedData = await scraper.fetchData(receipt.code);
+
+    // Merge scraped data with provided data
+    const enrichedReceipt: NewReceipt = {
+      ...receipt,
+      metadata: receipt.metadata || scrapedData.metadata,
+      htmlContent: receipt.htmlContent || scrapedData.htmlContent,
+    };
+
+    return await this.receiptRepository.create(enrichedReceipt);
   }
 
   async updateReceipt(id: number, receipt: Partial<NewReceipt>): Promise<Receipt | null> {
