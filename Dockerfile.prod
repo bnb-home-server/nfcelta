@@ -30,8 +30,9 @@ RUN bun install --production
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
 
-# Copy database migrations
-COPY --from=builder /app/drizzle ./drizzle
+# Copy source files needed for migrations and database schema
+COPY --from=builder /app/src/db ./src/db
+COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
