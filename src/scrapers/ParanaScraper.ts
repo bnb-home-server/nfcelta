@@ -1,5 +1,5 @@
 import type { IScraper, ScraperData } from './IScraper';
-import type { ReceiptMetadata, ReceiptItem } from '../types/receipt';
+import type { ReceiptMetadata, ReceiptMetadataItem } from '../types/receipt';
 
 export class ParanaScraper implements IScraper {
   private readonly baseUrl = 'https://www.fazenda.pr.gov.br/nfce/qrcode?p=';
@@ -118,8 +118,8 @@ export class ParanaScraper implements IScraper {
     }
   }
 
-  private extractItems(html: string): ReceiptItem[] {
-    const items: ReceiptItem[] = [];
+  private extractItems(html: string): ReceiptMetadataItem[] {
+    const items: ReceiptMetadataItem[] = [];
 
     // Match all item rows in the table
     const itemRegex = /<tr id="Item \+ \d+">[\s\S]*?<span class="txtTit2">([^<]+)<\/span>[\s\S]*?<span class="RCod">\(Código: ([^)]+)\)[\s\S]*?<strong>Qtde\.:<\/strong>([^<]+)[\s\S]*?<strong>UN: <\/strong>([^<]+)[\s\S]*?<strong>Vl\. Unit\.\:<\/strong>([^<]+)[\s\S]*?<span class="valor">([^<]+)<\/span>/g;

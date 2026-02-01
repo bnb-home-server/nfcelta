@@ -8,6 +8,7 @@ app.get('/', (c) => {
   return c.json({ message: 'Server is running' });
 });
 
+
 // Routes
 const receiptRoutes = createReceiptRoutes();
 app.route('/receipts', receiptRoutes);

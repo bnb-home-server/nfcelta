@@ -1,4 +1,7 @@
-export interface ReceiptItem {
+import { omit } from "zod/mini";
+import { Receipt } from "../db/schema";
+
+export interface ReceiptMetadataItem {
   name: string;
   code: string;
   quantity: string;
@@ -21,5 +24,8 @@ export interface ReceiptMetadata {
   consumerName: string;
   itemsCount: number;
   discount: string;
-  items: ReceiptItem[];
+  items: ReceiptMetadataItem[];
 }
+
+
+export type = omit<Receipt<>>

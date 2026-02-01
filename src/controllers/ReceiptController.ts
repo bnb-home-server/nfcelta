@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
 import type { IReceiptService } from '../types';
-import type { NewReceipt } from '../db/schema';
+import type { NewReceipt, Receipt } from '../db/schema';
 import { createReceiptSchema, updateReceiptSchema } from '../validators/receiptValidator';
 
 export class ReceiptController {
@@ -30,6 +30,33 @@ export class ReceiptController {
       }
 
       return c.json(receipt, 200);
+    } catch (error) {
+      return c.json(
+        {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
+        400
+      );
+    }
+  }
+
+async getReceiptByCode(c: Context) {
+    try {
+      const code = c.req.param('code');
+      const receipt = await this.receiptService.getReceiptByCode(code);
+
+      if (!receipt) {
+        return c.json({ error: 'Receipt not found' }, 404);
+      }
+ 
+      const response:Partial<Receipt> = {
+        ...receipt
+      }
+
+      delete response.metadata
+      delete response.htmlContent
+
+      return c.json(response, 200);
     } catch (error) {
       return c.json(
         {

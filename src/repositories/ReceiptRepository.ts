@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { receipts, type Receipt, type NewReceipt } from '../db/schema';
+import { receipts, type Receipt, type NewReceipt, ReceiptItem } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import type { IReceiptRepository } from '../types';
 
@@ -14,6 +14,28 @@ export class ReceiptRepository implements IReceiptRepository {
     });
     return receipt || null;
   }
+
+  async findByCode(code: string): Promise<Receipt | null> {
+    const receipt = await db.query.receipts.findFirst({
+      where: eq(receipts.code, code),
+      with:{
+        receiptItems:true
+      }
+    });
+    return receipt || null;
+  }
+
+  async findItemsByCode(code: string): Promise<ReceiptItem[] | null> {
+    const receipt = await db.query.receipts.findFirst({
+        where: eq(receipts.code, code),
+        with: {
+            receiptItems: true
+        },
+    });
+
+    return receipt?.receiptItems || null
+  }
+
 
   async create(receipt: NewReceipt): Promise<Receipt> {
     const result = await db.insert(receipts).values(receipt).returning();

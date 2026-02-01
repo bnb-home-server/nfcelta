@@ -1,9 +1,9 @@
-import type { Receipt, NewReceipt } from '../db/schema';
-import type { IReceiptRepository, IReceiptService } from '../types';
+import type { Receipt, NewReceipt, ReceiptItem } from '../db/schema';
+import type { IReceiptItemService, IReceiptRepository, IReceiptService } from '../types';
 import { ScraperFactory } from '../scrapers/ScraperFactory';
 
 export class ReceiptService implements IReceiptService {
-  constructor(private receiptRepository: IReceiptRepository) {}
+  constructor(private receiptRepository: IReceiptRepository,private receiptItemService: IReceiptItemService) {}
 
   async getAllReceipts(): Promise<Receipt[]> {
     return await this.receiptRepository.findAll();
@@ -16,7 +16,16 @@ export class ReceiptService implements IReceiptService {
     return await this.receiptRepository.findById(id);
   }
 
-  async createReceipt(receipt: NewReceipt): Promise<Receipt> {
+  async getReceiptByCode(code: string): Promise<Receipt | null> {
+    if (code.length <= 0) {
+      throw new Error('Code must be a valid string');
+    }
+
+    return await this.receiptRepository.findByCode(code);
+  }
+
+
+  async createReceipt(receipt: NewReceipt): Promise<ReceiptItem[]|null> {
     if (!receipt.code || !receipt.UF) {
       throw new Error('Code and UF are required');
     }
@@ -32,9 +41,18 @@ export class ReceiptService implements IReceiptService {
       ...receipt,
       metadata: receipt.metadata || scrapedData.metadata,
       htmlContent: receipt.htmlContent || scrapedData.htmlContent,
+      totalPrice:  receipt.totalPrice || parseFloat(scrapedData.totalAmount ?? '0')
     };
 
-    return await this.receiptRepository.create(enrichedReceipt);
+    const storedReceipt = await this.receiptRepository.create(enrichedReceipt);
+
+    if(scrapedData.metadata?.items){
+        for(let item of scrapedData.metadata?.items){
+           await this.receiptItemService.createReceiptItem(storedReceipt.id,item)
+        }
+    }
+
+    return this.receiptRepository.findItemsByCode(storedReceipt.code)
   }
 
   async updateReceipt(id: number, receipt: Partial<NewReceipt>): Promise<Receipt | null> {
