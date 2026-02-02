@@ -1,21 +1,33 @@
 import { db } from '../db';
-import { receipts, type Receipt, type NewReceipt, ReceiptItem } from '../db/schema';
+import { receipts, type Receipt, type NewReceipt, ReceiptItem, ReceiptWithItems } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import type { IReceiptRepository } from '../types';
 
 export class ReceiptRepository implements IReceiptRepository {
-  async findAll(): Promise<Receipt[]> {
-    return await db.query.receipts.findMany();
+  async findAll(limit?: number, offset?: number): Promise<Receipt[]> {
+    return await db.query.receipts.findMany({
+      limit,
+      offset,
+      orderBy: (receipts, { desc }) => [desc(receipts.createdAt)]
+    });
   }
 
-  async findById(id: number): Promise<Receipt | null> {
+  async count(): Promise<number> {
+    const result = await db.select({ count: receipts.id }).from(receipts);
+    return result.length;
+  }
+
+  async findById(id: number): Promise<ReceiptWithItems | null> {
     const receipt = await db.query.receipts.findFirst({
       where: eq(receipts.id, id),
+      with: {
+        receiptItems:true
+      }
     });
     return receipt || null;
   }
 
-  async findByCode(code: string): Promise<Receipt | null> {
+  async findByCode(code: string): Promise<ReceiptWithItems | null> {
     const receipt = await db.query.receipts.findFirst({
       where: eq(receipts.code, code),
       with:{

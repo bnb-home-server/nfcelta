@@ -1,22 +1,33 @@
-import type { Receipt, NewReceipt, ReceiptItem } from '../db/schema';
+import type { Receipt, NewReceipt, ReceiptItem, ReceiptWithItems } from '../db/schema';
 import type { IReceiptItemService, IReceiptRepository, IReceiptService } from '../types';
 import { ScraperFactory } from '../scrapers/ScraperFactory';
 
 export class ReceiptService implements IReceiptService {
   constructor(private receiptRepository: IReceiptRepository,private receiptItemService: IReceiptItemService) {}
 
-  async getAllReceipts(): Promise<Receipt[]> {
-    return await this.receiptRepository.findAll();
+  async getAllReceipts(page: number = 1, limit: number = 10): Promise<{ data: Receipt[], page: number, limit: number, total: number }> {
+    const offset = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.receiptRepository.findAll(limit, offset),
+      this.receiptRepository.count()
+    ]);
+
+    return {
+      data,
+      page,
+      limit,
+      total
+    };
   }
 
-  async getReceiptById(id: number): Promise<Receipt | null> {
+  async getReceiptById(id: number): Promise<ReceiptWithItems | null> {
     if (id <= 0) {
       throw new Error('ID must be a positive number');
     }
     return await this.receiptRepository.findById(id);
   }
 
-  async getReceiptByCode(code: string): Promise<Receipt | null> {
+  async getReceiptByCode(code: string): Promise<ReceiptWithItems | null> {
     if (code.length <= 0) {
       throw new Error('Code must be a valid string');
     }

@@ -8,7 +8,14 @@ export class ReceiptController {
 
   async getAllReceipts(c: Context) {
     try {
-      const receipts = await this.receiptService.getAllReceipts();
+      const page = parseInt(c.req.query('page') || '1', 10);
+      const limit = parseInt(c.req.query('limit') || '10', 10);
+
+      if (page < 1 || limit < 1 || limit > 100) {
+        return c.json({ error: 'Invalid pagination parameters' }, 400);
+      }
+
+      const receipts = await this.receiptService.getAllReceipts(page, limit);
       return c.json(receipts, 200);
     } catch (error) {
       return c.json(
@@ -48,13 +55,15 @@ async getReceiptByCode(c: Context) {
       if (!receipt) {
         return c.json({ error: 'Receipt not found' }, 404);
       }
- 
-      const response:Partial<Receipt> = {
-        ...receipt
-      }
 
-      delete response.metadata
-      delete response.htmlContent
+      const response = {
+        id: receipt.id,
+        code: receipt.code,
+        UF: receipt.UF,
+        totalPrice: receipt.totalPrice,
+        createdAt: receipt.createdAt,
+        receiptItems: receipt.receiptItems || []
+      };
 
       return c.json(response, 200);
     } catch (error) {

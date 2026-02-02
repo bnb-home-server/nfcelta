@@ -12,8 +12,6 @@ export const createReceiptSchema = z.object({
     (val) => UFStates.includes(val),
     { message: 'UF must be a valid Brazilian state code' }
   ),
-  metadata: z.record(z.string(), z.any()).optional(),
-  htmlContent: z.string().optional(),
 });
 
 export const updateReceiptSchema = z.object({
@@ -22,6 +20,7 @@ export const updateReceiptSchema = z.object({
     (val) => UFStates.includes(val),
     { message: 'UF must be a valid Brazilian state code' }
   ).optional(),
+  totalPrice: z.number().nonnegative('Total price must be non-negative').optional(),
   metadata: z.record(z.string(), z.any()).optional(),
   htmlContent: z.string().optional(),
 });

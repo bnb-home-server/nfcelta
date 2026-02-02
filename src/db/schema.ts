@@ -35,5 +35,9 @@ export const receiptItemsRelations = relations(receiptItems, ({ one }) => ({
 export type Receipt = typeof receipts.$inferSelect;
 export type NewReceipt = typeof receipts.$inferInsert;
 
-export type ReceiptItem = typeof receiptItems.$inferSelect
-export type NewReceiptItem = typeof receiptItems.$inferInsert
+export type ReceiptItem = typeof receiptItems.$inferSelect;
+export type NewReceiptItem = typeof receiptItems.$inferInsert;
+
+export type ReceiptWithItems = Receipt & {
+  receiptItems: ReceiptItem[];
+};

@@ -1,6 +1,3 @@
-import { omit } from "zod/mini";
-import { Receipt } from "../db/schema";
-
 export interface ReceiptMetadataItem {
   name: string;
   code: string;
@@ -26,6 +23,3 @@ export interface ReceiptMetadata {
   discount: string;
   items: ReceiptMetadataItem[];
 }
-
-
-export type = omit<Receipt<>>

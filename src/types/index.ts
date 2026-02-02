@@ -1,5 +1,5 @@
 import { ReceiptController } from '../controllers/ReceiptController';
-import type { Receipt, NewReceipt, ReceiptItem, NewReceiptItem } from '../db/schema';
+import type { Receipt, NewReceipt, ReceiptItem, NewReceiptItem, ReceiptWithItems } from '../db/schema';
 import { ReceiptRepository } from '../repositories/ReceiptRepository';
 import { ReceiptMetadataItem } from './receipt';
 
@@ -11,9 +11,10 @@ export type Env = {
 };
 
 export interface IReceiptRepository {
-  findAll(): Promise<Receipt[]>;
-  findById(id: number): Promise<Receipt | null>;
-  findByCode(code: string): Promise<Receipt | null>;
+  findAll(limit?: number, offset?: number): Promise<Receipt[]>;
+  count(): Promise<number>;
+  findById(id: number): Promise<ReceiptWithItems | null>;
+  findByCode(code: string): Promise<ReceiptWithItems | null>;
   findItemsByCode(code: string): Promise<ReceiptItem[]|null>
   create(receipt: NewReceipt): Promise<Receipt>;
   update(id: number, receipt: Partial<NewReceipt>): Promise<Receipt | null>;
@@ -21,9 +22,9 @@ export interface IReceiptRepository {
 }
 
 export interface IReceiptService {
-  getAllReceipts(): Promise<Receipt[]>;
-  getReceiptById(id: number): Promise<Receipt | null>;
-  getReceiptByCode(code: string): Promise<Receipt | null>;
+  getAllReceipts(page?: number, limit?: number): Promise<{ data: Receipt[], page: number, limit: number, total: number }>;
+  getReceiptById(id: number): Promise<ReceiptWithItems | null>;
+  getReceiptByCode(code: string): Promise<ReceiptWithItems | null>;
   createReceipt(receipt: NewReceipt): Promise<ReceiptItem[]| null>;
   updateReceipt(id: number, receipt: Partial<NewReceipt>): Promise<Receipt | null>;
   deleteReceipt(id: number): Promise<boolean>;
