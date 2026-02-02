@@ -35,8 +35,8 @@ COPY --from=builder /app/src/db ./src/db
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 
 # Create non-root user
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 bunuser && \
+RUN groupadd -r -g 1001 nodejs && \
+    useradd -r -u 1001 -g nodejs bunuser && \
     chown -R bunuser:nodejs /app
 
 USER bunuser
