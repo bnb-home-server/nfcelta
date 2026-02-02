@@ -36,7 +36,7 @@ export class ReceiptService implements IReceiptService {
   }
 
 
-  async createReceipt(receipt: NewReceipt): Promise<ReceiptItem[]|null> {
+  async createReceipt(receipt: NewReceipt): Promise<ReceiptWithItems|null> {
     if (!receipt.code || !receipt.UF) {
       throw new Error('Code and UF are required');
     }
@@ -63,7 +63,7 @@ export class ReceiptService implements IReceiptService {
         }
     }
 
-    return this.receiptRepository.findItemsByCode(storedReceipt.code)
+    return await this.receiptRepository.findById(storedReceipt.id)
   }
 
   async updateReceipt(id: number, receipt: Partial<NewReceipt>): Promise<Receipt | null> {

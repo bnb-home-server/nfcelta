@@ -36,6 +36,15 @@ export class ReceiptController {
         return c.json({ error: 'Receipt not found' }, 404);
       }
 
+      const response = {
+        id: receipt.id,
+        code: receipt.code,
+        UF: receipt.UF,
+        totalPrice: receipt.totalPrice,
+        createdAt: receipt.createdAt,
+        receiptItems: receipt.receiptItems || []
+      };
+
       return c.json(receipt, 200);
     } catch (error) {
       return c.json(
@@ -95,7 +104,25 @@ async getReceiptByCode(c: Context) {
       }
 
       const receipt = await this.receiptService.createReceipt(validation.data as NewReceipt);
-      return c.json(receipt, 201);
+
+      if(!receipt){
+        return c.json({
+          error: 'Error on create receipt',
+        },
+        500
+      );
+      }
+
+      const response = {
+        id: receipt.id,
+        code: receipt.code,
+        UF: receipt.UF,
+        totalPrice: receipt.totalPrice,
+        createdAt: receipt.createdAt,
+        receiptItems: receipt.receiptItems || []
+      };
+
+      return c.json(response, 201);
     } catch (error) {
       return c.json(
         {

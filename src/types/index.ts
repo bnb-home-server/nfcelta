@@ -25,7 +25,7 @@ export interface IReceiptService {
   getAllReceipts(page?: number, limit?: number): Promise<{ data: Receipt[], page: number, limit: number, total: number }>;
   getReceiptById(id: number): Promise<ReceiptWithItems | null>;
   getReceiptByCode(code: string): Promise<ReceiptWithItems | null>;
-  createReceipt(receipt: NewReceipt): Promise<ReceiptItem[]| null>;
+  createReceipt(receipt: NewReceipt): Promise<ReceiptWithItems| null>;
   updateReceipt(id: number, receipt: Partial<NewReceipt>): Promise<Receipt | null>;
   deleteReceipt(id: number): Promise<boolean>;
 }
