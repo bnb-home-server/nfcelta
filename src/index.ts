@@ -7,10 +7,11 @@ const app = new Hono();
 
 app.use(cors({
     origin: '*',
-    allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
-    allowMethods: ['POST','PUT','DELETE','PATCH', 'GET', 'OPTIONS'],
-    maxAge: 600,
-    credentials: true,
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['*'],
+    exposeHeaders: ['*'],
+    maxAge: 86400,
+    credentials: false, // must be false when origin is '*'
   }))
 // Health check
 app.get('/', (c) => {
